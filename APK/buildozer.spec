@@ -55,7 +55,7 @@ android.archs = arm64-v8a
 android.service = False
 
 # (list) Android features to enable
-android.features = android.hardware.sensor.barometer
+#android.features = android.hardware.sensor.barometer
 
 [buildozer]
 

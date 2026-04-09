@@ -18,11 +18,16 @@ on:
 
 jobs:
   build:
-    # 核心修改 1：将系统降级到 22.04，这是目前 Kivy 打包最稳的环境
     runs-on: ubuntu-22.04
 
     steps:
     - uses: actions/checkout@v4
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
 
     - name: Set up Python
       uses: actions/setup-python@v5
@@ -32,14 +37,13 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        # 核心修改 2：锁定 Cython 版本，避免 3.x 带来的编译冲突
-        pip install "cython<3.0.0" buildozer
+        # 固定使用 1.5.0 版本以避开最新的参数兼容性 Bug
+        pip install "buildozer==1.5.0" "cython<3.0.0"
 
     - name: Install system dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y \
-          openjdk-17-jdk \
           build-essential \
           git \
           libffi-dev \
@@ -58,14 +62,17 @@ jobs:
           lld
 
     - name: Build APK
-      # 核心修改 3：移除手动安装 SDK 的步骤，让 Buildozer 自己管理
-      # 这样可以避免 GitHub 预装的 SDK 与 Buildozer 下载的产生冲突
       run: |
         cd APK
-        # 自动接受所有 SDK 许可
+        # 1. 彻底清理之前的错误缓存
+        buildozer android clean
+        
+        # 2. 预先接受所有 SDK 许可
+        mkdir -p "$HOME/.android"
+        touch "$HOME/.android/repositories.cfg"
         yes | buildozer android debug
       env:
-        # 强制清理可能干扰 Buildozer 的系统环境变量
+        # 清除系统预装路径干扰
         ANDROID_HOME: ""
         ANDROID_NDK_HOME: ""
 
