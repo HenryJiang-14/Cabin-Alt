@@ -69,6 +69,7 @@ jobs:
         echo -e "\nd975f751698a77b662f1254ddbeed3901e976f5a" >> $ANDROID_HOME/licenses/android-sdk-license
         yes | buildozer android debug || cat .buildozer/logs/*.log
       env:
+        ANDROIDSDK: /usr/local/lib/android/sdk
         ANDROID_NDK_HOME: /usr/local/lib/android/sdk/ndk/27.3
 
     - name: Upload APK artifact
