@@ -1,0 +1,68 @@
+========================================
+  GitHub Actions 自动打包 APK 指南
+========================================
+
+【首次设置】
+
+1. 创建 GitHub 仓库
+   - 访问 https://github.com/new
+   - 创建新仓库（公开或私有都可以）
+
+2. 上传代码到 GitHub
+   git init
+   git add .
+   git commit -m "Initial commit"
+   git branch -M main
+   git remote add origin https://github.com/你的用户名/仓库名.git
+   git push -u origin main
+
+3. 自动构建
+   - 每次推送到 main 分支时自动触发
+   - 或在 GitHub 页面手动触发
+
+
+【使用方法】
+
+方法 1：自动触发（推送代码）
+   git add .
+   git commit -m "更新应用"
+   git push
+   → 自动开始构建
+
+方法 2：手动触发
+   1. 进入 GitHub 仓库
+   2. 点击 "Actions" 标签
+   3. 选择 "Build APK"
+   4. 点击 "Run workflow"
+   5. 可选：输入版本号
+   6. 点击绿色按钮开始构建
+
+
+【下载 APK】
+
+构建完成后：
+1. 进入 Actions 页面
+2. 点击最近的工作流运行
+3. 在底部 "Artifacts" 部分
+4. 点击 "cabin-alt-apk" 下载
+
+
+【发布正式版本】
+
+git tag v1.0.0
+git push origin v1.0.0
+→ 自动创建 Release 并附加 APK
+
+
+【配置文件位置】
+
+工作流配置: .github/workflows/build-apk.yml
+构建规格:   APK/buildozer.spec
+
+
+【注意事项】
+
+- 首次构建约需 15-20 分钟
+- 后续构建约需 5-10 分钟（有缓存）
+- 免费额度：每月 2000 分钟
+- APK 保留 30 天
