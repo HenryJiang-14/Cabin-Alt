@@ -37,7 +37,7 @@ android.api = 34
 android.minapi = 21
 
 # (str) Android NDK version to use
-android.ndk = 25b
+android.ndk = 27c
 
 # (bool) Use --private data storage (True) or --dir public storage (False)
 android.private_storage = False
@@ -60,7 +60,7 @@ android.features = android.hardware.sensor.barometer
 [buildozer]
 
 # (int) Log level (0 = error only, 1 = info, 2 = debug (with command output))
-log_level = 1
+log_level = 2
 
 # (int) Display warning if buildozer is run as root (0 = False, 1 = True)
 warn_on_root = 1
