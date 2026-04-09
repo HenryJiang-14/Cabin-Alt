@@ -37,7 +37,7 @@ android.api = 34
 android.minapi = 21
 
 # (str) Android NDK version to use
-android.ndk = 29.0
+android.ndk = 25b
 
 # (bool) Use --private data storage (True) or --dir public storage (False)
 android.private_storage = False

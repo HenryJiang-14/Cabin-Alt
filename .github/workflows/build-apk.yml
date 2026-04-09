@@ -63,6 +63,9 @@ jobs:
     - name: Build APK
       run: |
         cd APK
+        # Symlink CI's NDK to where buildozer expects it (android.ndk = 25b)
+        mkdir -p /usr/local/lib/android/sdk
+        ln -sf /usr/local/lib/android/sdk/ndk/29.0.14206865 /usr/local/lib/android/sdk/android-ndk-r25b
         mkdir -p $ANDROID_HOME/licenses
         echo -e "\n24333f8a63b6825ea9c5514f83c2829b004d1fee" > $ANDROID_HOME/licenses/android-sdk-license
         echo -e "\n84831b9409646a918e30573bab4c9c91346d8abd" >> $ANDROID_HOME/licenses/android-sdk-license
@@ -71,8 +74,10 @@ jobs:
       env:
         ANDROID_HOME: /usr/local/lib/android/sdk
         ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+        ANDROIDSDK: /usr/local/lib/android/sdk
         ANDROID_NDK_HOME: /usr/local/lib/android/sdk/ndk/29.0.14206865
         ANDROIDNDK: /usr/local/lib/android/sdk/ndk/29.0.14206865
+        PACKAGES_PATH: /home/runner/.buildozer/android/packages
 
     - name: Upload APK artifact
       uses: actions/upload-artifact@v4
