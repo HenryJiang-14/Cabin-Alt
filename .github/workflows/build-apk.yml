@@ -63,9 +63,13 @@ jobs:
         mv cmdline-tools latest
         rm commandlinetools-linux-9477386_latest.zip
         
-        # Accept licenses and install platform-tools
-        yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
+        # Accept licenses and install required components
+        yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
         $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+        
+        # Create tools directory structure that buildozer expects
+        mkdir -p $ANDROID_HOME/tools/bin
+        ln -sf $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager $ANDROID_HOME/tools/bin/sdkmanager
 
     - name: Update version if provided
       if: github.event_name == 'workflow_dispatch' && github.event.inputs.version != ''
