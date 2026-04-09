@@ -12,13 +12,14 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version number (e.g., 1.0.0)'
+        description: 'Version number'
         required: false
         default: '1.0.0'
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    # 核心修改 1：将系统降级到 22.04，这是目前 Kivy 打包最稳的环境
+    runs-on: ubuntu-22.04
 
     steps:
     - uses: actions/checkout@v4
@@ -31,58 +32,42 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install buildozer cython
+        # 核心修改 2：锁定 Cython 版本，避免 3.x 带来的编译冲突
+        pip install "cython<3.0.0" buildozer
 
     - name: Install system dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y \
           openjdk-17-jdk \
+          build-essential \
+          git \
+          libffi-dev \
+          libssl-dev \
+          python3-dev \
           zip \
           unzip \
           autoconf \
           libtool \
-          libtool-bin \
           pkg-config \
           zlib1g-dev \
           libncurses5-dev \
           libncursesw5-dev \
           cmake \
-          libffi-dev \
-          libssl-dev \
-          build-essential \
-          git \
-          wget
-
-    - name: Setup Android SDK
-      run: |
-        export ANDROID_HOME=$HOME/.buildozer/android/platform/android-sdk
-        mkdir -p $ANDROID_HOME/cmdline-tools
-        cd $ANDROID_HOME/cmdline-tools
-        wget -q https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
-        unzip -q commandlinetools-linux-9477386_latest.zip
-        mv cmdline-tools latest
-        rm commandlinetools-linux-9477386_latest.zip
-        
-        # Accept licenses and install required components
-        yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
-        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
-        
-        # Create tools directory structure that buildozer expects
-        mkdir -p $ANDROID_HOME/tools/bin
-        ln -sf $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager $ANDROID_HOME/tools/bin/sdkmanager
-
-    - name: Update version if provided
-      if: github.event_name == 'workflow_dispatch' && github.event.inputs.version != ''
-      run: |
-        cd APK
-        sed -i "s/^version = .*/version = ${{ github.event.inputs.version }}/" buildozer.spec
-        cat buildozer.spec | grep "^version"
+          libltdl-dev \
+          lld
 
     - name: Build APK
+      # 核心修改 3：移除手动安装 SDK 的步骤，让 Buildozer 自己管理
+      # 这样可以避免 GitHub 预装的 SDK 与 Buildozer 下载的产生冲突
       run: |
         cd APK
-        buildozer android debug
+        # 自动接受所有 SDK 许可
+        yes | buildozer android debug
+      env:
+        # 强制清理可能干扰 Buildozer 的系统环境变量
+        ANDROID_HOME: ""
+        ANDROID_NDK_HOME: ""
 
     - name: Upload APK artifact
       uses: actions/upload-artifact@v4
@@ -90,12 +75,3 @@ jobs:
         name: cabin-alt-apk
         path: APK/bin/*.apk
         retention-days: 30
-
-    - name: Create Release (on tag)
-      if: startsWith(github.ref, 'refs/tags/')
-      uses: softprops/action-gh-release@v1
-      with:
-        files: APK/bin/*.apk
-        generate_release_notes: true
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
