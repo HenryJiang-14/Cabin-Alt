@@ -42,6 +42,7 @@ jobs:
           unzip \
           autoconf \
           libtool \
+          libtool-bin \
           pkg-config \
           zlib1g-dev \
           libncurses5-dev \
